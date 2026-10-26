@@ -60,6 +60,7 @@ label{font-size:13px;font-weight:600}
 .side-brand span{color:var(--gold-dark)}
 .side-group{font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);margin:16px 6px 6px}
 .side button.menu-item{display:block;width:100%;text-align:left;background:transparent;border:0;padding:10px 12px;border-radius:10px;font-size:15px;font-weight:500;color:var(--ink);cursor:pointer}
+.side button.menu-toggle{display:block;width:100%;text-align:left;background:var(--gold);border:0;padding:10px 12px;border-radius:10px;font-size:15px;font-weight:700;color:#22301F;cursor:pointer;margin:0 0 4px}
 .side button.menu-item.on{background:var(--gold);color:#22301F}
 .side-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:40;display:none}
 .side-overlay.open{display:block}
@@ -112,6 +113,7 @@ select.paydaychip{width:auto}
 </div>
 <button class="iconbtn" id="sideClose" title="Close menu">✕</button>
 </div>
+<button class="menu-toggle" id="drawerDarkBtn" onclick="toggleDark()">🌙 Dark mode: off</button>
 <div class="side-group">Paycheck</div>
 <button class="menu-item on" data-nav="home">💰 Paycheck</button>
 <button class="menu-item" data-nav="home">⭐ Safe to Spend</button>
@@ -1225,6 +1227,7 @@ function applyBody(){
   document.body.classList.toggle('hide',!!S.settings.hideAmounts);
   document.body.classList.toggle('dark',!!S.settings.darkMode);
   var db=document.getElementById('darkBtn');if(db)db.textContent=S.settings.darkMode?'☀️':'🌙';
+  var dd=document.getElementById('drawerDarkBtn');if(dd)dd.textContent=S.settings.darkMode?'☀️ Dark mode: on':'🌙 Dark mode: off';
 }
 function toggleDark(){S.settings.darkMode=!S.settings.darkMode;save();applyBody();renderSettings();}
 function toggleAcc(k){S.settings[k]=!S.settings[k];save();applyBody();renderSettings();}
