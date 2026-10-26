@@ -13,6 +13,9 @@ body.easy{font-family:Verdana,Geneva,sans-serif;letter-spacing:.3px}
 body.motion *{transition:none!important;animation:none!important}
 body.hide .money{font-size:0!important}
 body.hide .money::after{content:"•••";font-size:16px}
+body.dark{--bg:#1E2A1A;--card:#2A3A26;--ink:#EAF2E4;--muted:#B9C7B0;--line:#3A4A35;--soft:#33452E;--gold-dark:#D8C88F}
+body.dark .tag{color:#D8C88F}
+body.dark .chips button.sel{outline-color:#EAF2E4}
 .wrap{max-width:560px;margin:0 auto}
 .top{display:flex;justify-content:space-between;align-items:center;margin:4px 2px 14px;gap:8px}
 .brand{font-size:22px;font-weight:700;letter-spacing:-.3px}
@@ -60,6 +63,9 @@ label{font-size:13px;font-weight:600}
 .side button.menu-item.on{background:var(--gold);color:#22301F}
 .side-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:40;display:none}
 .side-overlay.open{display:block}
+@media(max-width:959px){
+#darkBtn{display:none}
+}
 @media(min-width:960px){
 .side{transform:none}
 .side-overlay{display:none!important}
@@ -159,6 +165,7 @@ select.paydaychip{width:auto}
 </div>
 <div style="display:flex;gap:8px;align-items:center">
 <span class="chip" id="paydayChip">Payday soon</span>
+<button class="iconbtn" id="darkBtn" title="Dark mode" onclick="toggleDark()">🌙</button>
 <button class="iconbtn" data-nav="settings" title="Settings">⚙️</button>
 </div>
 </div>
@@ -194,6 +201,8 @@ select.paydaychip{width:auto}
 <input id="quickNote" placeholder="What was it?" style="flex:1.4">
 <button onclick="quickLog()">Log</button>
 </div>
+<label>Take it from</label><select id="quickAcct"></select>
+<p id="quickMsg"></p>
 <p>Voice logging is on the Tools screen. Voice needs Chrome + internet. There is no watch app.</p>
 <button class="ghost" data-nav="assign">Assign every dollar →</button>
 <button class="ghost" data-nav="plan">Paycheck plan →</button>
@@ -271,6 +280,11 @@ select.paydaychip{width:auto}
 <div id="calDetail" style="margin-top:10px"></div>
 <h3>Year calendar</h3>
 <p>Months with three biweekly paydays are flagged — a bonus paycheck month.</p>
+<div style="display:flex;gap:8px;align-items:center">
+<button class="ghost" onclick="yearMove(-1)">← Prev year</button>
+<b id="yearTitle" style="flex:1;text-align:center"></b>
+<button class="ghost" onclick="yearMove(1)">Next year →</button>
+</div>
 <div id="yearGrid"></div>
 <p id="yearNote"></p>
 </div>
@@ -281,7 +295,7 @@ select.paydaychip{width:auto}
 <button class="backbtn" data-nav="home">← Paycheck</button>
 <div class="card">
 <h2>🏦 Accounts</h2>
-<p>Balances are amounts you confirm here. Spending logged in the app is tracked for insights and does not change these balances by itself.</p>
+<p>Balances are amounts you confirm here. When you log a spend, it is taken from the account you pick, so balances stay true.</p>
 <div id="acctList"></div>
 <h3>Move money between accounts</h3>
 <label>From</label><select id="trFrom"></select>
@@ -324,15 +338,24 @@ select.paydaychip{width:auto}
 <button class="backbtn" data-nav="home">← Paycheck</button>
 <div class="card">
 <h2>📈 Insights</h2>
+<h3>Net worth</h3>
+<p id="netWorthText"></p>
+<p class="small">Counts: all account balances right now, minus all debt balances right now. This is a point-in-time figure, not filtered by period.</p>
+<h3>Period</h3>
+<div class="chips" id="insChips"></div>
 <h3>Savings rate</h3>
 <p id="saveRateText"></p>
-<p class="small">Counts: money-in entries logged this month, minus logged spends and bills marked paid this month.</p>
+<p class="small">Counts: money-in entries logged in the selected period, minus logged spends and bills marked paid in the selected period.</p>
 <h3>50 / 30 / 20</h3>
 <p id="splitText"></p>
-<p class="small">Counts: this month's logged spends grouped by their category tag (need, want), plus savings set aside this paycheck.</p>
+<p class="small">Counts: logged spends in the selected period grouped by their category tag (need, want), plus savings set aside this paycheck.</p>
+<h3>Spending trend</h3>
+<div class="fbar" id="trendBars"></div>
+<p id="trendText"></p>
+<p class="small">Counts: logged spends in the selected period, grouped by day (7D), by week (1M), or by month (3M, 6M, 12M).</p>
 <h3>Spending by category</h3>
 <div id="insightCats"></div>
-<h3>Money in this month</h3>
+<h3>Money in (selected period)</h3>
 <div id="moneyInList"></div>
 <label>Add money in</label><input id="miLabel" placeholder="e.g. Paycheck">
 <input id="miAmt" type="number" min="0" step="0.01" placeholder="0.00">
@@ -405,8 +428,9 @@ select.paydaychip{width:auto}
 <label>Already saved</label><input id="goalSaved" type="number" min="0" step="0.01" value="0">
 <button onclick="addGoal()">Add goal</button>
 <h3>💌 Cash envelopes</h3>
-<p>Money left in an envelope at month end rolls over into next month when rollover is on.</p>
+<p>Money left in an envelope at month end rolls over into next month when automatic rollover is on in Settings, or when you tap "Carry leftover forward".</p>
 <div id="envList"></div>
+<p id="envMsg"></p>
 <label>New envelope</label><input id="envName" placeholder="e.g. Groceries">
 <label>Set aside</label><input id="envAmt" type="number" min="0" step="0.01" value="0">
 <button onclick="addEnv()">Add envelope</button>
@@ -438,12 +462,15 @@ select.paydaychip{width:auto}
 <button class="ghost" onclick="toggleAcc('easyFont')">Easy-read font: <span id="accEasy">off</span></button>
 <button class="ghost" onclick="toggleAcc('reducedMotion')">Reduced motion: <span id="accMotion">off</span></button>
 <button class="ghost" onclick="toggleAcc('hideAmounts')">Hide amounts: <span id="accHide">off</span></button>
+<button class="ghost" onclick="toggleDark()">Dark mode: <span id="accDark">off</span></button>
+<button class="ghost" onclick="toggleAcc('autoRollover')">Envelope rollover: automatic <span id="accRoll">off</span></button>
 <label>Text size (3 steps)</label>
 <select id="setSize" onchange="saveSettingsForm()"><option value="0">Small</option><option value="1">Medium</option><option value="2">Large</option></select>
 <h3>Backup</h3>
 <p>Backups are files you move yourself. There is no live sync and no bank connection. A backup file keeps your data safe if you change devices.</p>
 <button onclick="doBackupExport()">Export JSON backup</button>
 <button onclick="doCsvExport()">Export spends + bills (CSV)</button>
+<p id="csvInfo"></p>
 <label>Import JSON backup (replaces this device's planner)</label>
 <input type="file" id="impFile" accept=".json">
 <button onclick="doBackupImport()">Import backup</button>
@@ -514,6 +541,27 @@ function paydaysFrom(anchorStr,count,freq){
   for(var j=0;j<count;j++)out.push(addDays(d,j*step));
   return out;
 }
+function paydaysBefore(anchorStr,count,freq){
+  var d=parseDate(anchorStr),out=[];
+  if(freq==='twice-monthly'){
+    var cur=new Date(d);
+    while(out.length<count){
+      var y=cur.getFullYear(),m=cur.getMonth(),dd=cur.getDate(),prev;
+      if(dd>15)prev=new Date(y,m,15);
+      else if(dd>1)prev=new Date(y,m,1);
+      else prev=new Date(y,m-1,15);
+      out.unshift(prev);cur=prev;
+    }
+    return out;
+  }
+  if(freq==='monthly'){
+    for(var k=count;k>=1;k--)out.push(new Date(d.getFullYear(),d.getMonth()-k,d.getDate()));
+    return out;
+  }
+  var step=freq==='weekly'?7:14;
+  for(var j=count;j>=1;j--)out.push(addDays(d,-j*step));
+  return out;
+}
 function coveringPaycheck(dueStr,paydayStrs){
   var due=parseDate(dueStr),best=null;
   for(var i=0;i<paydayStrs.length;i++){var p=parseDate(paydayStrs[i]);if(p<=due)best=paydayStrs[i];}
@@ -578,7 +626,7 @@ var CURSYM={USD:'$',EUR:'€',GBP:'£',PKR:'Rs ',INR:'₹',CAD:'$',AUD:'$'};
 var S=null;
 function seedState(){
   return {
-    settings:{payAmount:1950,nextPayday:'2026-10-31',payFreq:'biweekly',currency:'USD',savingsSetAside:875,textSize:1,easyFont:false,reducedMotion:false,hideAmounts:false,lastBackup:null,lastYear:2026},
+    settings:{payAmount:1950,nextPayday:'2026-10-31',payFreq:'biweekly',currency:'USD',savingsSetAside:875,textSize:1,easyFont:false,reducedMotion:false,hideAmounts:false,lastBackup:null,lastYear:2026,darkMode:false,autoRollover:false,lastAutoRoll:null,lastCsv:null},
     accounts:[{id:'a-check',name:'Checking',type:'checking',balance:1950},{id:'a-save',name:'Savings',type:'savings',balance:800},{id:'a-cash',name:'Cash',type:'cash',balance:120}],
     bills:[
       {id:'b-rent',name:'Rent',amount:850,due:'2026-11-04',repeat:'monthly',paid:false},
@@ -718,11 +766,14 @@ function renderHome(){
   var P2=paydaysList(2),nextP=P2[1];
   var cov=S.bills.filter(function(b){return !b.paid&&b.due>=P&&b.due<nextP;}).sort(function(a,b){return a.due<b.due?-1:1;});
   var att=billsDueBeforePayday().filter(function(b){return b.due>=fmtDate(todayMid());}).sort(function(a,b){return a.due<b.due?-1:1;});
+  var allPayH=paydaysBefore(nextPaydayStr(),6,S.settings.payFreq).map(fmtDate).concat(paydaysList(12));
   var html='';
   cov.forEach(function(b){html+='<div class="bill"><div><b>'+esc(b.name)+'</b><span>Due '+niceDate(b.due)+' · from '+niceDate(P)+' paycheck</span></div><div class="amt money">'+money(b.amount)+'</div></div>';});
-  att.forEach(function(b){html+='<div class="bill"><div><b>'+esc(b.name)+'</b><span>Due '+niceDate(b.due)+' · needs money first</span></div><div class="amt money">'+money(b.amount)+'</div></div>';});
+  att.forEach(function(b){var cp=coveringPaycheck(b.due,allPayH);html+='<div class="bill"><div><b>'+esc(b.name)+'</b><span>Due '+niceDate(b.due)+(cp?(' · from '+niceDate(cp)+' paycheck'):' · needs money first')+'</span></div><div class="amt money">'+money(b.amount)+'</div></div>';});
   S.envelopes.forEach(function(e){if(e.setAside>0)html+='<div class="bill"><div><b>'+esc(e.name)+' envelope</b><span>Set aside from this paycheck</span></div><div class="amt money">'+money(e.setAside)+'</div></div>';});
   document.getElementById('homeCovers').innerHTML=html||'<p>Nothing assigned yet.</p>';
+  var qa=document.getElementById('quickAcct');
+  if(qa){var prev=qa.value;qa.innerHTML=S.accounts.map(function(a){return '<option value="'+a.id+'">'+esc(a.name)+'</option>';}).join('');if(prev&&S.accounts.some(function(a){return a.id===prev;}))qa.value=prev;}
   var bc=document.getElementById('backupCard');
   var lb=S.settings.lastBackup;
   var daysSince=lb?dayDiff(parseDate(lb),todayMid()):9999;
@@ -800,6 +851,7 @@ function renderPlan(){
   }).join('');
   var idx=list.indexOf(planSel),nextP=list[idx+1]||fmtDate(addDays(parseDate(planSel),14));
   var P=planSel;
+  var allPay=paydaysBefore(nextPaydayStr(),6,S.settings.payFreq).map(fmtDate).concat(paydaysList(12));
   document.getElementById('planPayLine').textContent='Payday '+niceDate(P)+' · paycheck '+money(S.settings.payAmount);
   var cov=S.bills.filter(function(b){return !b.paid&&b.due>=P&&b.due<nextP;}).sort(function(a,b){return a.due<b.due?-1:1;});
   var html='';
@@ -810,7 +862,7 @@ function renderPlan(){
     var att=billsDueBeforePayday().filter(function(b){return b.due>=fmtDate(todayMid());}).sort(function(a,b){return a.due<b.due?-1:1;});
     if(att.length){
       attHtml='<div class="attn"><h3>Still needs money — due before this paycheck</h3>';
-      att.forEach(function(b){attHtml+='<div class="bill"><div><b>'+esc(b.name)+'</b><span>Due '+niceDate(b.due)+'</span></div><div class="amt money">'+money(b.amount)+'</div></div>';});
+      att.forEach(function(b){var cp=coveringPaycheck(b.due,allPay);attHtml+='<div class="bill"><div><b>'+esc(b.name)+'</b><span>Due '+niceDate(b.due)+(cp?(' · from '+niceDate(cp)+' paycheck'):'')+' — needs money before this payday</span></div><div class="amt money">'+money(b.amount)+'</div></div>';});
       attHtml+='</div>';
     }
   }
@@ -822,21 +874,23 @@ function renderPlan(){
   var th='';
   events.forEach(function(e){th+='<div class="bill"><div><b>'+niceDate(e.d)+'</b><span>'+e.label+'</span></div><div class="amt">'+(e.pay?'💰':'🧾')+'</div></div>';});
   document.getElementById('planTimeline').innerHTML=th||'<p>Nothing in the next 60 days.</p>';
-  var all=paydaysList(12);
   var eh='';
   S.bills.forEach(function(b){
-    var cp=coveringPaycheck(b.due,all);
+    var cp=coveringPaycheck(b.due,allPay);
     eh+='<div class="bill"><div><b>'+esc(b.name)+'</b><span>Due '+niceDate(b.due)+'</span></div><div class="amt">'+(cp?('Payday '+niceDate(cp)):'needs money now')+'</div></div>';
   });
   document.getElementById('planEvery').innerHTML=eh||'<p>No bills yet.</p>';
 }
 
 /* ---------- calendar ---------- */
-var calY=null,calM=null;
+var calY=null,calM=null,yearShown=null;
+function yearMove(n){if(yearShown===null)yearShown=todayMid().getFullYear();yearShown+=n;renderCalendar();}
 function renderCalendar(){
   var t=todayMid();
   if(calY===null){calY=t.getFullYear();calM=t.getMonth();}
+  if(yearShown===null)yearShown=t.getFullYear();
   document.getElementById('calTitle').textContent=monthName(calM)+' '+calY;
+  document.getElementById('yearTitle').textContent=yearShown;
   var first=new Date(calY,calM,1),startDay=first.getDay(),days=new Date(calY,calM+1,0).getDate();
   var paySet=new Set(paydaysFrom(nextPaydayStr(),60,S.settings.payFreq).map(fmtDate));
   var dueMap={};
@@ -854,13 +908,13 @@ function renderCalendar(){
   document.getElementById('calGrid').innerHTML=html;
   var yh='';
   for(var m=0;m<12;m++){
-    var c=countPaydaysInMonth(calY,m,nextPaydayStr(),S.settings.payFreq);
+    var c=countPaydaysInMonth(yearShown,m,nextPaydayStr(),S.settings.payFreq);
     yh+='<div class="bill"><div><b>'+monthName(m)+'</b></div><div class="amt">'+c+' payday'+(c===1?'':'s')+(c>=3?' — 3-paycheck month ✓':'')+'</div></div>';
   }
   document.getElementById('yearGrid').innerHTML=yh;
   var nm=null;
   for(var k=0;k<24;k++){
-    var d2=new Date(t.getFullYear(),t.getMonth()+k,1);
+    var d2=new Date(yearShown,0,1);d2.setMonth(k);
     if(countPaydaysInMonth(d2.getFullYear(),d2.getMonth(),nextPaydayStr(),S.settings.payFreq)>=3){nm=d2;break;}
   }
   document.getElementById('yearNote').textContent=nm?('Next 3-paycheck month: '+monthName(nm.getMonth())+' '+nm.getFullYear()+'.'):'No 3-paycheck month in the next 2 years.';
@@ -931,20 +985,55 @@ function addDebt(){
 
 /* ---------- insights ---------- */
 function monthOf(d){return d.slice(0,7);}
+var insPeriod='1M';
+function insPeriodSet(p){insPeriod=p;renderInsights();}
+function periodStartDays(p){
+  if(p==='7D')return 7;
+  if(p==='3M')return 90;
+  if(p==='6M')return 180;
+  if(p==='12M')return 365;
+  return 30;
+}
+function inPeriod(ds,days){
+  var d=parseDate(ds),t=todayMid();
+  return d<=t&&dayDiff(d,t)<days;
+}
 function renderInsights(){
-  var ym=monthOf(fmtDate(todayMid()));
-  var inc=S.moneyIn.filter(function(x){return monthOf(x.date)===ym;}).reduce(function(s,x){return s+x.amount;},0);
-  var sp=S.spends.filter(function(x){return monthOf(x.date)===ym;});
+  var days=periodStartDays(insPeriod);
+  var inc=S.moneyIn.filter(function(x){return inPeriod(x.date,days);}).reduce(function(s,x){return s+x.amount;},0);
+  var sp=S.spends.filter(function(x){return inPeriod(x.date,days);});
   var spTotal=sp.reduce(function(s,x){return s+x.amount;},0);
-  var paidBills=S.bills.filter(function(b){return b.paid&&b.paidDate&&monthOf(b.paidDate)===ym;}).reduce(function(s,b){return s+b.amount;},0);
+  var paidBills=S.bills.filter(function(b){return b.paid&&b.paidDate&&inPeriod(b.paidDate,days);}).reduce(function(s,b){return s+b.amount;},0);
   var out=spTotal+paidBills;
   var sr=savingsRate(inc,out);
-  document.getElementById('saveRateText').textContent=sr===null?('No money-in logged this month yet.'):(money(inc)+' in − '+money(out)+' out = savings rate '+sr+'%.');
+  var nw=S.accounts.reduce(function(s,a){return s+a.balance;},0)-S.debts.reduce(function(s,d){return s+d.balance;},0);
+  document.getElementById('netWorthText').textContent=money(nw)+(nw<0?' — debts are bigger than balances right now.':'');
+  var periods=['7D','1M','3M','6M','12M'];
+  document.getElementById('insChips').innerHTML=periods.map(function(p){return '<button class="'+(p===insPeriod?'sel':'ghost')+'" onclick="insPeriodSet(\''+p+'\')">'+p+'</button>';}).join('');
+  document.getElementById('saveRateText').textContent=sr===null?('No money-in logged in this period yet.'):(money(inc)+' in − '+money(out)+' out = savings rate '+sr+'%.');
   var catById={};S.categories.forEach(function(c){catById[c.id]=c;});
   var needs=0,wants=0;
   sp.forEach(function(x){var c=catById[x.cat];if(c&&c.tag==='need')needs+=x.amount;if(c&&c.tag==='want')wants+=x.amount;});
   var sp2=split5030(inc,needs,wants,S.settings.savingsSetAside||0);
   document.getElementById('splitText').textContent=sp2?('Needs '+money(needs)+' ('+sp2.needs+'%), wants '+money(wants)+' ('+sp2.wants+'%), savings set aside '+money(S.settings.savingsSetAside||0)+' ('+sp2.savings+'%). Targets are 50 / 30 / 20.'):'Add money-in first to see 50 / 30 / 20.';
+  var buckets=[],labels=[];
+  if(insPeriod==='7D'){
+    for(var i=6;i>=0;i--){var dd=addDays(todayMid(),-i);buckets.push(0);labels.push(niceDate(fmtDate(dd)));}
+    sp.forEach(function(x){var ix=dayDiff(parseDate(x.date),todayMid());if(ix>=0&&ix<7)buckets[6-ix]+=x.amount;});
+  } else if(insPeriod==='1M'){
+    for(var w=0;w<5;w++){buckets.push(0);labels.push('Week '+(w+1));}
+    sp.forEach(function(x){var ix=dayDiff(parseDate(x.date),todayMid());if(ix>=0&&ix<30)buckets[Math.min(4,Math.floor((29-ix)/7))]+=x.amount;});
+  } else {
+    var months=insPeriod==='3M'?3:(insPeriod==='6M'?6:12);
+    var t0=todayMid();
+    for(var m=months-1;m>=0;m--){var md=new Date(t0.getFullYear(),t0.getMonth()-m,1);buckets.push(0);labels.push(monthName(md.getMonth())+' '+md.getFullYear());}
+    sp.forEach(function(x){var xd=parseDate(x.date);var mi=(xd.getFullYear()-t0.getFullYear())*12+(xd.getMonth()-t0.getMonth())+months-1;if(mi>=0&&mi<months)buckets[mi]+=x.amount;});
+  }
+  var max=Math.max.apply(null,buckets.concat([1]));
+  var bh='';
+  buckets.forEach(function(v,ix){var h=Math.max(8,Math.round(v/max*100));bh+='<div style="height:'+h+'px;'+(v===max&&v>0?'background:#8A7A2E;':'')+'" title="'+labels[ix]+' — '+money(v)+'"></div>';});
+  document.getElementById('trendBars').innerHTML=bh;
+  document.getElementById('trendText').textContent='Spending trend for the selected period: '+money(spTotal)+' logged in total.';
   var ch='';
   S.categories.forEach(function(c){
     var spent=sp.filter(function(x){return x.cat===c.id;}).reduce(function(s,x){return s+x.amount;},0);
@@ -952,7 +1041,7 @@ function renderInsights(){
   });
   document.getElementById('insightCats').innerHTML=ch||'<p>No categories yet.</p>';
   var mh='';
-  S.moneyIn.forEach(function(x){mh+='<div class="bill"><div><b>'+esc(x.label)+'</b><span>'+niceDate(x.date)+'</span></div><div class="amt money">'+money(x.amount)+'</div></div>';});
+  S.moneyIn.filter(function(x){return inPeriod(x.date,days);}).forEach(function(x){mh+='<div class="bill"><div><b>'+esc(x.label)+'</b><span>'+niceDate(x.date)+'</span></div><div class="amt money">'+money(x.amount)+'</div></div>';});
   document.getElementById('moneyInList').innerHTML=mh||'<p>Nothing yet.</p>';
 }
 function addMoneyIn(){
@@ -1045,7 +1134,7 @@ function voiceLog(){
       var m=txt.match(/(\d+(\.\d+)?)/),amt=m?parseFloat(m[1]):null;
       if(amt===null){for(var w in words){if(txt.toLowerCase().indexOf(w)>=0){amt=words[w];break;}}}
       var note=txt.replace(/(\d+(\.\d+)?)/,'').trim()||'Voice spend';
-      if(amt!==null){S.spends.push({id:uid(),amount:amt,note:note,cat:S.categories[0]?S.categories[0].id:'',date:fmtDate(todayMid())});save();document.getElementById('voiceOut').textContent='Logged: '+money(amt)+' — '+note;}
+      if(amt!==null){var va=S.accounts[0];if(va)va.balance=Math.round((va.balance-amt)*100)/100;S.spends.push({id:uid(),amount:amt,note:note,cat:S.categories[0]?S.categories[0].id:'',date:fmtDate(todayMid()),acct:va?va.id:null});save();document.getElementById('voiceOut').textContent='Logged: '+money(amt)+' — '+note+(va?(' (Taken from '+va.name+')'):'');}
       else document.getElementById('voiceOut').textContent='Heard "'+txt+'" but no amount was found. Try again with an amount.';
     };
     r.onerror=function(){document.getElementById('voiceOut').textContent='Voice did not work. Voice needs Chrome + internet, and microphone permission.';};
@@ -1055,8 +1144,12 @@ function voiceLog(){
 function quickLog(){
   var a=parseFloat(document.getElementById('quickAmt').value),n=document.getElementById('quickNote').value.trim()||'Spend';
   if(!a)return;
-  S.spends.push({id:uid(),amount:a,note:n,cat:S.categories[0]?S.categories[0].id:'',date:fmtDate(todayMid())});save();
+  var acctId=document.getElementById('quickAcct').value;
+  var acct=S.accounts.find(function(x){return x.id===acctId;})||S.accounts[0];
+  if(acct)acct.balance=Math.round((acct.balance-a)*100)/100;
+  S.spends.push({id:uid(),amount:a,note:n,cat:S.categories[0]?S.categories[0].id:'',date:fmtDate(todayMid()),acct:acct?acct.id:null});save();
   document.getElementById('quickAmt').value='';document.getElementById('quickNote').value='';
+  document.getElementById('quickMsg').textContent=acct?('Logged '+money(a)+' — Taken from '+acct.name+'. '+acct.name+' is now '+money(acct.balance)+'.'):'Logged '+money(a)+'.';
   renderHome();
 }
 
@@ -1095,7 +1188,11 @@ function addEnv(){
 function delEnv(id){S.envelopes=S.envelopes.filter(function(x){return x.id!==id;});save();renderGoals();}
 function envRoll(id){
   var e=S.envelopes.find(function(x){return x.id===id;});
-  if(e&&e.rollover){var left=e.setAside-e.spent;if(left>0){e.setAside=left;e.spent=0;save();renderGoals();}}
+  if(!e)return;
+  if(!e.rollover){renderGoals();document.getElementById('envMsg').textContent='Rollover is off for '+e.name+'.';return;}
+  var left=e.setAside-e.spent;
+  if(left>0){e.setAside=left;e.spent=0;save();renderGoals();document.getElementById('envMsg').textContent='Carried '+money(left)+' forward — '+e.name+' now has '+money(left)+' set aside.';}
+  else{renderGoals();document.getElementById('envMsg').textContent='Nothing left to carry for '+e.name+'.';}
 }
 function addCat(){
   var n=document.getElementById('catName').value.trim(),b=parseFloat(document.getElementById('catBudget').value)||0,t=document.getElementById('catTag').value;
@@ -1115,7 +1212,10 @@ function renderSettings(){
   document.getElementById('accEasy').textContent=S.settings.easyFont?'on':'off';
   document.getElementById('accMotion').textContent=S.settings.reducedMotion?'on':'off';
   document.getElementById('accHide').textContent=S.settings.hideAmounts?'on':'off';
+  document.getElementById('accDark').textContent=S.settings.darkMode?'on':'off';
+  document.getElementById('accRoll').textContent=S.settings.autoRollover?'on':'off';
   document.getElementById('backupInfo').textContent=S.settings.lastBackup?('Last backup: '+S.settings.lastBackup):'No backup exported yet.';
+  document.getElementById('csvInfo').textContent=S.settings.lastCsv?('CSV downloaded: '+S.settings.lastCsv+'.'):'No CSV exported yet.';
   applyBody();
 }
 function applyBody(){
@@ -1123,7 +1223,10 @@ function applyBody(){
   document.body.classList.toggle('easy',!!S.settings.easyFont);
   document.body.classList.toggle('motion',!!S.settings.reducedMotion);
   document.body.classList.toggle('hide',!!S.settings.hideAmounts);
+  document.body.classList.toggle('dark',!!S.settings.darkMode);
+  var db=document.getElementById('darkBtn');if(db)db.textContent=S.settings.darkMode?'☀️':'🌙';
 }
+function toggleDark(){S.settings.darkMode=!S.settings.darkMode;save();applyBody();renderSettings();}
 function toggleAcc(k){S.settings[k]=!S.settings[k];save();applyBody();renderSettings();}
 function saveSettingsForm(){
   S.settings.currency=document.getElementById('setCur').value;
@@ -1149,7 +1252,9 @@ function doCsvExport(){
   S.spends.forEach(function(x){rows.push(['spend',x.note,x.amount,x.date]);});
   S.bills.forEach(function(b){rows.push(['bill',b.name,b.amount,b.due]);});
   var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  S.settings.lastCsv=fmtDate(todayMid());save();
   download('SafeSpends-Export.csv',csv);
+  var ci=document.getElementById('csvInfo');if(ci)ci.textContent='CSV downloaded: '+S.settings.lastCsv+'.';
 }
 function doBackupImport(){
   var f=document.getElementById('impFile').files[0];if(!f)return;
@@ -1160,7 +1265,7 @@ function doBackupImport(){
 function clearAll(){
   if(!confirm('Clear everything on this device?'))return;
   localStorage.removeItem(KEY);
-  S={settings:{payAmount:0,nextPayday:fmtDate(addDays(todayMid(),14)),payFreq:'biweekly',currency:'USD',savingsSetAside:0,textSize:1,easyFont:false,reducedMotion:false,hideAmounts:false,lastBackup:null,lastYear:todayMid().getFullYear()},accounts:[{id:'a-check',name:'Checking',type:'checking',balance:0}],bills:[],sinking:[],envelopes:[],goals:[],categories:[],spends:[],moneyIn:[],debts:[],assign:{},paused:[],dump:[],daily:[],milestones:[],resetSteps:[false,false,false,false,false],transfers:[]};
+  S={settings:{payAmount:0,nextPayday:fmtDate(addDays(todayMid(),14)),payFreq:'biweekly',currency:'USD',savingsSetAside:0,textSize:1,easyFont:false,reducedMotion:false,hideAmounts:false,lastBackup:null,lastYear:todayMid().getFullYear(),darkMode:false,autoRollover:false,lastAutoRoll:null,lastCsv:null},accounts:[{id:'a-check',name:'Checking',type:'checking',balance:0}],bills:[],sinking:[],envelopes:[],goals:[],categories:[],spends:[],moneyIn:[],debts:[],assign:{},paused:[],dump:[],daily:[],milestones:[],resetSteps:[false,false,false,false,false],transfers:[]};
   save();location.reload();
 }
 /* ---------- init ---------- */
@@ -1170,6 +1275,10 @@ load();
   if(S.settings.lastYear<y){
     S.bills.forEach(function(b){b.due=advanceBillForYear(b,y);});
     S.settings.lastYear=y;save();
+  }
+  if(S.settings.autoRollover&&S.settings.lastAutoRoll!==nextPaydayStr()){
+    S.envelopes.forEach(function(e){if(e.rollover){var left=e.setAside-e.spent;if(left>0){e.setAside=left;e.spent=0;}}});
+    S.settings.lastAutoRoll=nextPaydayStr();save();
   }
 })();
 applyBody();
