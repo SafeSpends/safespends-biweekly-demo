@@ -7,7 +7,7 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#F2F7F2;--gold:#C2B97F;--gold-dark:#8A7A2E;--ink:#22301F;--muted:#55624F;--card:#FFFFFF;--line:#E4EADF;--soft:#EFF3E6}
-body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;font-size:16px;padding:16px 16px 24px}
+body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;font-size:16px;padding:16px 16px 24px;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 body[data-size="0"]{font-size:15px}body[data-size="1"]{font-size:17px}body[data-size="2"]{font-size:19px}
 body.easy{font-family:Verdana,Geneva,sans-serif;letter-spacing:.3px}
 body.motion *{transition:none!important;animation:none!important}
@@ -15,46 +15,48 @@ body.hide .money{font-size:0!important}
 body.hide .money::after{content:"•••";font-size:16px}
 .wrap{max-width:560px;margin:0 auto}
 .top{display:flex;justify-content:space-between;align-items:center;margin:4px 2px 14px;gap:8px}
-.brand{font-size:22px;font-weight:800;letter-spacing:-.3px}
+.brand{font-size:22px;font-weight:700;letter-spacing:-.3px}
 .brand span{color:var(--gold-dark)}
-.logo-mark{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;flex:0 0 auto;background:var(--gold);color:#22301F;border-radius:12px;font-size:22px;font-weight:800}
+.logo-mark{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;flex:0 0 auto;background:var(--gold);color:#22301F;border-radius:12px;font-size:22px;font-weight:700}
 .chip{background:var(--gold);color:#22301F;font-size:12px;font-weight:700;padding:7px 11px;border-radius:999px;white-space:nowrap}
 .iconbtn{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 11px;font-size:16px;cursor:pointer;color:var(--ink)}
 .hero{background:var(--gold);border-radius:22px;padding:20px;color:#22301F}
-.hero .lbl{font-size:12px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;opacity:.75}
-.hero .pay{font-size:44px;font-weight:800;letter-spacing:-1px;margin:6px 0 2px}
+.hero .lbl{font-size:12px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;opacity:.75}
+.hero .pay{font-size:44px;font-weight:700;letter-spacing:-1px;margin:6px 0 2px}
 .hero .sub{font-size:13px;opacity:.85}
 .bar{height:12px;background:rgba(255,255,255,.55);border-radius:99px;margin:16px 0 8px;overflow:hidden}
 .bar i{display:block;height:100%;background:#22301F;border-radius:99px}
-.row{display:flex;justify-content:space-between;font-size:13px;font-weight:700;gap:8px}
-.left{font-size:34px;font-weight:800;margin-top:14px}
+.row{display:flex;justify-content:space-between;font-size:13px;font-weight:600;gap:8px}
+.left{font-size:34px;font-weight:700;margin-top:14px}
 .left small{font-size:13px;font-weight:700;display:block;letter-spacing:.4px;text-transform:uppercase;opacity:.7;margin-bottom:2px}
 .card{background:var(--card);border-radius:20px;padding:16px 18px;margin-top:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .card h2{font-size:16px;margin-bottom:10px}
 .card h3{font-size:15px;margin:14px 0 8px}
 .card p{font-size:13px;color:var(--muted);line-height:1.5}
+h2,h3{font-weight:600}
+b,strong{font-weight:600}
 .safe{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .safe b{font-size:28px;color:var(--gold-dark)}
 .bill{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-top:1px solid var(--line);gap:10px}
 .bill:first-of-type{border-top:0;padding-top:2px}
 .bill b{font-size:15px}
 .bill span{display:block;font-size:12px;color:var(--muted);margin-top:2px}
-.bill .amt{font-size:16px;font-weight:800;white-space:nowrap}
-.tag{font-size:11px;font-weight:700;color:#5C6B1F;background:var(--soft);border-radius:999px;padding:3px 8px;margin-left:6px;vertical-align:2px}
+.bill .amt{font-size:16px;font-weight:700;white-space:nowrap}
+.tag{font-size:11px;font-weight:600;color:#5C6B1F;background:var(--soft);border-radius:999px;padding:3px 8px;margin-left:6px;vertical-align:2px}
 .attn{border-left:5px solid var(--gold);padding-left:10px}
-button,.btn{background:var(--gold);border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;color:#22301F;font-size:14px}
+button,.btn{background:var(--gold);border:0;border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer;color:#22301F;font-size:14px}
 button.ghost,.btn.ghost{background:var(--card);border:1px solid var(--line);color:var(--ink)}
 input,select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;margin:6px 0;font-size:15px;background:var(--card);color:var(--ink)}
-label{font-size:13px;font-weight:700}
+label{font-size:13px;font-weight:600}
 .view{display:none}.view.on{display:block}
-.nav{background:var(--card);border-top:1px solid var(--line);border-radius:16px;display:flex;justify-content:space-around;padding:12px 8px 16px;font-size:12px;font-weight:700;color:var(--muted);margin-top:16px}
+.nav{background:var(--card);border-top:1px solid var(--line);border-radius:16px;display:flex;justify-content:space-around;padding:12px 8px 16px;font-size:12px;font-weight:600;color:var(--muted);margin-top:16px}
 .side{position:fixed;left:0;top:0;bottom:0;width:244px;background:var(--card);border-right:1px solid var(--line);padding:16px 12px;overflow-y:auto;z-index:50;transform:translateX(-105%);transition:transform .2s ease}
 .side.open{transform:translateX(0)}
 .side-head{display:flex;justify-content:space-between;align-items:center;margin:0 4px 12px}
-.side-brand{font-size:20px;font-weight:800}
+.side-brand{font-size:20px;font-weight:700}
 .side-brand span{color:var(--gold-dark)}
-.side-group{font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);margin:16px 6px 6px}
-.side button.menu-item{display:block;width:100%;text-align:left;background:transparent;border:0;padding:10px 12px;border-radius:10px;font-size:15px;font-weight:600;color:var(--ink);cursor:pointer}
+.side-group{font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);margin:16px 6px 6px}
+.side button.menu-item{display:block;width:100%;text-align:left;background:transparent;border:0;padding:10px 12px;border-radius:10px;font-size:15px;font-weight:500;color:var(--ink);cursor:pointer}
 .side button.menu-item.on{background:var(--gold);color:#22301F}
 .side-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:40;display:none}
 .side-overlay.open{display:block}
@@ -63,7 +65,7 @@ label{font-size:13px;font-weight:700}
 .side-overlay{display:none!important}
 #hambBtn{display:none}
 #sideClose{display:none}
-.wrap{max-width:1068px;margin:0 auto;padding-left:268px}
+.wrap{max-width:none;margin-left:268px;margin-right:24px}
 .brand-wrap{display:none!important}
 }
 .nav div{text-align:center;cursor:pointer;flex:1}
@@ -74,21 +76,21 @@ label{font-size:13px;font-weight:700}
 .tile b{display:block;font-size:14px}.tile span{font-size:12px;color:var(--muted)}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px;text-align:center;font-size:12px}
 .cal div{padding:7px 2px;border-radius:8px}
-.cal .hd{font-weight:800;color:var(--muted)}
-.cal .pay{background:var(--gold);font-weight:800;color:#22301F}
+.cal .hd{font-weight:700;color:var(--muted)}
+.cal .pay{background:var(--gold);font-weight:700;color:#22301F}
 .cal .due{border:2px solid var(--gold)}
 .cal .today{outline:2px solid var(--gold-dark)}
 .fbar{display:flex;align-items:flex-end;gap:5px;height:110px;margin-top:12px}
 .fbar div{flex:1;background:var(--gold);border-radius:6px 6px 0 0;text-align:center;font-size:10px}
 .fbar .low{background:#8A7A2E}
-.ring{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#22301F}
+.ring{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#22301F}
 .note{font-size:13px;color:var(--muted);text-align:left;margin-top:14px;line-height:1.6}
 .footer-note{font-size:12px;color:var(--muted);text-align:center;margin-top:18px;line-height:1.5}
 .small{font-size:12px;color:var(--muted)}
 .checkrow{display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line)}
 .checkrow:first-of-type{border-top:0}
 .checkrow input{width:20px;margin:0;flex:none}
-.backbtn{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-weight:700;cursor:pointer;color:var(--ink);margin-bottom:12px}
+.backbtn{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-weight:600;cursor:pointer;color:var(--ink);margin-bottom:12px}
 select.paydaychip{width:auto}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
 .chips button{border-radius:999px}
@@ -148,7 +150,7 @@ select.paydaychip{width:auto}
 </aside>
 <div class="side-overlay" id="sideOverlay"></div>
 <div class="wrap">
-<div style="background:#C2B97F;color:#22301F;font-weight:800;text-align:center;padding:12px 14px;border-radius:14px;margin-bottom:12px">DEMO — This is the free demo with sample data. Nothing you change here is saved. · Full version: SafeSpendsStudio on Etsy</div>
+<div style="background:#C2B97F;color:#22301F;font-weight:600;font-size:15px;text-align:center;padding:12px 14px;border-radius:14px;margin-bottom:12px">DEMO — This is the free demo with sample data. Nothing you change here is saved. · Full version: SafeSpendsStudio on Etsy</div>
 <div class="top">
 <div class="brand-wrap" style="display:flex;gap:8px;align-items:center">
 <button class="iconbtn" id="hambBtn" title="Menu">☰</button>
@@ -207,7 +209,7 @@ select.paydaychip{width:auto}
 <label>Paycheck</label>
 <select id="assignPaySel"></select>
 <div style="text-align:center;margin:14px 0 4px"><span class="small">LEFT TO ASSIGN</span>
-<div style="font-size:36px;font-weight:800"><span class="money" id="assignLeft">$860</span></div>
+<div style="font-size:36px;font-weight:700"><span class="money" id="assignLeft">$860</span></div>
 <p id="assignMsg">You still have money unassigned — this money is not spendable yet. Give every dollar a job.</p></div>
 <div id="assignRows"></div>
 <button class="ghost" onclick="resetAssign()">Reset this paycheck</button>
