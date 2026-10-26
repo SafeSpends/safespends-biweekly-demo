@@ -77,7 +77,7 @@ label{font-size:13px;font-weight:600}
 @media(min-width:960px){
 .side{transform:none}
 .side-overlay{display:none!important}
-.nav .pluscell{display:none}
+.nav{display:none}
 .sheet,.sheet-overlay{display:none!important}
 #hambBtn{display:none}
 #sideClose{display:none}
@@ -138,7 +138,6 @@ select.paydaychip{width:auto}
 </div>
 <button class="iconbtn" id="sideClose" title="Close menu">✕</button>
 </div>
-<button class="menu-toggle" id="drawerDarkBtn" onclick="toggleDark()">🌙 Dark mode: off</button>
 <div class="side-group">Paycheck</div>
 <button class="menu-item on" data-nav="home">💰 Paycheck</button>
 <button class="menu-item" data-nav="home">⭐ Safe to Spend</button>
@@ -1300,7 +1299,6 @@ function applyBody(){
   document.body.classList.toggle('hide',!!S.settings.hideAmounts);
   document.body.classList.toggle('dark',!!S.settings.darkMode);
   var db=document.getElementById('darkBtn');if(db)db.textContent=S.settings.darkMode?'☀️':'🌙';
-  var dd=document.getElementById('drawerDarkBtn');if(dd)dd.textContent=S.settings.darkMode?'☀️ Dark mode: on':'🌙 Dark mode: off';
 }
 function toggleDark(){S.settings.darkMode=!S.settings.darkMode;save();applyBody();renderSettings();}
 function toggleAcc(k){S.settings[k]=!S.settings[k];save();applyBody();renderSettings();}
