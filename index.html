@@ -66,10 +66,15 @@ label{font-size:13px;font-weight:600}
 .side-overlay.open{display:block}
 @media(max-width:959px){
 #darkBtn{display:none}
+#hambBtn{display:none}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:45;border-radius:0;margin-top:0;padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
+.wrap{padding-bottom:88px}
 }
 @media(min-width:960px){
 .side{transform:none}
 .side-overlay{display:none!important}
+.nav .pluscell{display:none}
+.sheet,.sheet-overlay{display:none!important}
 #hambBtn{display:none}
 #sideClose{display:none}
 .wrap{max-width:none;margin-left:268px;margin-right:24px}
@@ -78,6 +83,22 @@ label{font-size:13px;font-weight:600}
 .nav div{text-align:center;cursor:pointer;flex:1}
 .nav .on{color:var(--ink)}
 .nav .ic{font-size:20px;display:block;margin-bottom:2px}
+.nav .pluscell{display:flex;align-items:center;justify-content:center}
+.plusbtn{width:52px;height:52px;border-radius:50%;background:var(--gold);color:#22301F;font-size:30px;font-weight:700;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:55;display:none}
+.sheet-overlay.open{display:block}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--card);border-radius:20px 20px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom));max-height:85vh;overflow-y:auto;transform:translateY(105%);transition:transform .2s ease;box-shadow:0 -2px 16px rgba(0,0,0,.2)}
+.sheet.open{transform:none}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.sheet-head b{font-size:18px}
+.sheet-dark{display:block;width:100%;text-align:left;background:var(--gold);border:0;padding:12px 14px;border-radius:12px;font-size:15px;font-weight:700;color:#22301F;cursor:pointer;margin-bottom:14px}
+.sheet-group{font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);margin:16px 4px 6px}
+.sheet-row{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;border:0;border-top:1px solid var(--line);border-radius:0;padding:11px 4px;cursor:pointer;color:var(--ink);font-size:14px}
+.sheet-row .row-main{display:block;text-align:left;flex:1}
+.sheet-row b{display:block;font-size:15px}
+.sheet-row .desc{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.sheet-row .chev{font-size:18px;color:var(--muted);flex:0 0 auto}
+.sheet-row.sheet-spend{background:var(--soft);border:0;border-radius:12px;padding:12px 14px;margin-bottom:2px}
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 .tile{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;cursor:pointer}
 .tile b{display:block;font-size:14px}.tile span{font-size:12px;color:var(--muted)}
@@ -504,9 +525,56 @@ select.paydaychip{width:auto}
 <nav class="nav">
 <div data-nav="home" class="on"><span class="ic">💰</span>Paycheck</div>
 <div data-nav="assign"><span class="ic">✏️</span>Assign</div>
+<div class="pluscell"><button class="plusbtn" onclick="openSheet()" title="All of your planner">+</button></div>
 <div data-nav="bills"><span class="ic">🧾</span>Bills</div>
 <div data-nav="more"><span class="ic">▦</span>More</div>
 </nav>
+<div class="sheet-overlay" id="sheetOverlay" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet">
+<div class="sheet-head"><b>All of your planner</b><button class="iconbtn" onclick="closeSheet()" title="Close">✕</button></div>
+<button class="sheet-dark" id="sheetDarkBtn" onclick="toggleDark();closeSheet()">🌙 Dark mode: off</button>
+<button class="sheet-row sheet-spend" data-nav="spend" onclick="closeSheet()"><span class="row-main"><b>💸 Log a spend</b><span class="desc">Add a spend to this paycheck, fast</span></span><span class="chev">›</span></button>
+<div class="sheet-group">Paycheck</div>
+<button class="sheet-row" data-nav="home" onclick="closeSheet()"><span class="row-main"><b>💰 Paycheck</b><span class="desc">This paycheck, assigned and left to assign</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="home" onclick="closeSheet()"><span class="row-main"><b>⭐ Safe to Spend</b><span class="desc">Your safe number for today</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="assign" onclick="closeSheet()"><span class="row-main"><b>✏️ Assign every dollar</b><span class="desc">Give every dollar of this paycheck a job</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="plan" onclick="closeSheet()"><span class="row-main"><b>💰 Paycheck plan</b><span class="desc">Every bill and the paycheck that covers it</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="calendar" onclick="closeSheet()"><span class="row-main"><b>🗓️ Pay calendar</b><span class="desc">Paydays and due dates, month by month</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="calendar" onclick="closeSheet()"><span class="row-main"><b>📅 Year calendar</b><span class="desc">The whole year of paydays at a glance</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="calendar" onclick="closeSheet()"><span class="row-main"><b>3️⃣ 3-paycheck months</b><span class="desc">Months with an extra paycheck, flagged</span></span><span class="chev">›</span></button>
+<div class="sheet-group">Money in &amp; out</div>
+<button class="sheet-row" data-nav="bills" onclick="closeSheet()"><span class="row-main"><b>🧾 Bills</b><span class="desc">All your bills, with mark paid and undo</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="bills" onclick="closeSheet()"><span class="row-main"><b>🛡️ Bill protection</b><span class="desc">Money kept safe until each bill is paid</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="bills" onclick="closeSheet()"><span class="row-main"><b>💰 Sinking funds</b><span class="desc">Save a little each paycheck for big costs</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="accounts" onclick="closeSheet()"><span class="row-main"><b>🏦 Accounts</b><span class="desc">Your balances in one place</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="accounts" onclick="closeSheet()"><span class="row-main"><b>↔️ Transfers</b><span class="desc">Move money between your accounts</span></span><span class="chev">›</span></button>
+<div class="sheet-group">Goals &amp; saving</div>
+<button class="sheet-row" data-nav="goals" onclick="closeSheet()"><span class="row-main"><b>🎯 Goals</b><span class="desc">Savings goals with progress rings</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="goals" onclick="closeSheet()"><span class="row-main"><b>💌 Cash envelopes</b><span class="desc">Envelope budgets with rollover</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="goals" onclick="closeSheet()"><span class="row-main"><b>🏷️ Categories</b><span class="desc">Colour budgets for each spending type</span></span><span class="chev">›</span></button>
+<div class="sheet-group">Debt &amp; insights</div>
+<button class="sheet-row" data-nav="debts" onclick="closeSheet()"><span class="row-main"><b>🔥 Debt planner</b><span class="desc">Snowball and Avalanche payoff plans</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="debts" onclick="closeSheet()"><span class="row-main"><b>📈 Extra-payment simulator</b><span class="desc">See how extra payments move your debt-free date</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="insights" onclick="closeSheet()"><span class="row-main"><b>📈 Insights</b><span class="desc">Your money, summed up by period</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="insights" onclick="closeSheet()"><span class="row-main"><b>💹 Savings rate</b><span class="desc">What share of your money you kept</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="insights" onclick="closeSheet()"><span class="row-main"><b>⚖️ 50 / 30 / 20</b><span class="desc">Needs, wants and savings, side by side</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="forecast" onclick="closeSheet()"><span class="row-main"><b>🔮 Forecast</b><span class="desc">Your balance day by day to payday</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="forecast" onclick="closeSheet()"><span class="row-main"><b>🧪 What-if tester</b><span class="desc">Test a spend before you make it</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="forecast" onclick="closeSheet()"><span class="row-main"><b>✅ Can this fit?</b><span class="desc">Check if a purchase fits this paycheck</span></span><span class="chev">›</span></button>
+<div class="sheet-group">Quiet tools</div>
+<button class="sheet-row" data-nav="tools" onclick="closeSheet()"><span class="row-main"><b>⏸️ Purchase pause</b><span class="desc">Wait before buying, on purpose</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="tools" onclick="closeSheet()"><span class="row-main"><b>🧠 Brain dump</b><span class="desc">Get money worries out of your head</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="tools" onclick="closeSheet()"><span class="row-main"><b>🎤 Voice logging</b><span class="desc">Log a spend by speaking</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="tools" onclick="closeSheet()"><span class="row-main"><b>☀️ Daily plan</b><span class="desc">Three small money things for today</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="tools" onclick="closeSheet()"><span class="row-main"><b>🏅 Milestones</b><span class="desc">Small wins, noticed along the way</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="tools" onclick="closeSheet()"><span class="row-main"><b>🔁 Weekly reset</b><span class="desc">Five steps to start the week clear</span></span><span class="chev">›</span></button>
+<div class="sheet-group">Settings</div>
+<button class="sheet-row" data-nav="settings" onclick="closeSheet()"><span class="row-main"><b>💾 Backup &amp; export</b><span class="desc">Save your data as a file, and bring it back</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="settings" onclick="closeSheet()"><span class="row-main"><b>♿ Accessibility</b><span class="desc">Easy-read text, motion and hidden amounts</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="settings" onclick="closeSheet()"><span class="row-main"><b>💱 Currency</b><span class="desc">Dollars, pounds, rupees and more</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="settings" onclick="closeSheet()"><span class="row-main"><b>⚙️ Settings</b><span class="desc">Payday, text size and app options</span></span><span class="chev">›</span></button>
+<button class="sheet-row" data-nav="more" onclick="closeSheet()"><span class="row-main"><b>▦ More</b><span class="desc">Everything else in one place</span></span><span class="chev">›</span></button>
+</div>
 <p class="footer-note">SafeSpends is a budgeting tool, not financial advice. It is designed with ADHD brains in mind; it does not diagnose or treat ADHD.</p>
 </div>
 
@@ -731,6 +799,8 @@ document.addEventListener('click',function(e){
   }
   closeSide();
 });
+function openSheet(){document.getElementById('sheet').classList.add('open');document.getElementById('sheetOverlay').classList.add('open');}
+function closeSheet(){var s=document.getElementById('sheet');if(s)s.classList.remove('open');var o=document.getElementById('sheetOverlay');if(o)o.classList.remove('open');}
 function openSide(){document.getElementById('sideMenu').classList.add('open');document.getElementById('sideOverlay').classList.add('open');}
 function closeSide(){var s=document.getElementById('sideMenu');if(s)s.classList.remove('open');var o=document.getElementById('sideOverlay');if(o)o.classList.remove('open');}
 document.getElementById('hambBtn').addEventListener('click',openSide);
@@ -1228,6 +1298,7 @@ function applyBody(){
   document.body.classList.toggle('dark',!!S.settings.darkMode);
   var db=document.getElementById('darkBtn');if(db)db.textContent=S.settings.darkMode?'☀️':'🌙';
   var dd=document.getElementById('drawerDarkBtn');if(dd)dd.textContent=S.settings.darkMode?'☀️ Dark mode: on':'🌙 Dark mode: off';
+  var sd=document.getElementById('sheetDarkBtn');if(sd)sd.textContent=S.settings.darkMode?'☀️ Dark mode: on':'🌙 Dark mode: off';
 }
 function toggleDark(){S.settings.darkMode=!S.settings.darkMode;save();applyBody();renderSettings();}
 function toggleAcc(k){S.settings[k]=!S.settings[k];save();applyBody();renderSettings();}
